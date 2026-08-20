@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.johanwork.job</groupId>
+        <artifactId>job-portal-ai</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>job-portal-service</artifactId>
+    <packaging>pom</packaging>
+    <name>job-portal-service</name>
+    <description>Business Services Modules</description>
+
+    <modules>
+        <module>user-service</module>
+        <module>company-service</module>
+        <module>job-service</module>
+        <module>resume-service</module>
+        <module>application-service</module>
+        <module>preferences-service</module>
+    </modules>
+
+</project>

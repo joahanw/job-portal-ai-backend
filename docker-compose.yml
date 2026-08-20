@@ -1,0 +1,35 @@
+services:
+  job-portal-user-db:
+    image: postgres:17.9
+    container_name: job-portal-user-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=job_portal_user
+    restart: unless-stopped
+    volumes:
+      - job-portal-user-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+#  redis:
+#    image: redis:latest
+#    container_name: redis-server
+#    restart: unless-stopped
+#    ports:
+#      - "6379:6379"
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 3
+
+
+volumes:
+  job-portal-user-db:
+    name: job-portal-user-db
