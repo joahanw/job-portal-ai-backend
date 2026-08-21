@@ -33,7 +33,7 @@ public class JobMapper {
                 .requirements(job.getRequirements())
                 .responsibilities(job.getResponsibilities())
                 .benefits(job.getBenefits())
-                .employerId(job.getCompanyId())
+                .employerId(job.getEmployerId())
                 .company(company)
                 // JobCategory
                 .category(jobCategoryMapper.mapEntityToResponse(job.getCategory()))

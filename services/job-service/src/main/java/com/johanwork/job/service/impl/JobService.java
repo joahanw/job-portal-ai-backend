@@ -1,5 +1,6 @@
 package com.johanwork.job.service.impl;
 
+import com.johanwork.job.client.CompanyClient;
 import com.johanwork.job.constant.AppConstant;
 import com.johanwork.job.domain.JobStatus;
 import com.johanwork.job.dto.JobSearchRequest;
@@ -42,6 +43,7 @@ public class JobService implements IJobService {
     private final IJobCategoryDomainService jobCategoryDomain;
     private final IJobSkillDomainService jobSkillDomain;
     private final IJobTagDomainService jobTagDomain;
+    private final CompanyClient companyClient;
 
     @Override
     public GenericResponse<PageResponse<JobResponse>> getAllJobs(int pageNumber, int pageSize,
@@ -86,7 +88,6 @@ public class JobService implements IJobService {
     @Transactional
     @Override
     public GenericResponse<JobResponse> createJob(Long employerId, JobRequest req) {
-        Long companyId = 1L;
         JobCategory jobCategory = jobCategoryDomain.getById(req.categoryId());
         Set<JobSkill> skills = req.skillIds() != null
                 ? jobSkillDomain.getSkills(req.skillIds())
@@ -95,19 +96,19 @@ public class JobService implements IJobService {
                 ? jobTagDomain.getJobIds(req.tagIds())
                 : Collections.emptySet();
 
+        // TODO: Fetch Data company
+        CompanyResponse company = companyClient.getCompaniesByOwner(employerId).getData();
+
         Job job = jobMapper.mapRequestToEntity(new Job(), req);
         job.setEmployerId(employerId);
         job.setCategory(jobCategory);
         job.setSkills(skills);
         job.setTags(tags);
-
-        // TODO: Fetch Data company
-        job.setCompanyId(companyId);
-
+        job.setCompanyId(company.getId());
         job = jobRepository.save(job);
 
         return jobMapper.mapToGenericResponse(
-                job, getCompany(job.getCompanyId()),
+                job, company,
                 String.format(AppConstant.Success.FETCHED, "Jobs")
         );
     }
@@ -158,7 +159,6 @@ public class JobService implements IJobService {
         );
     }
 
-
     @Transactional
     @Override
     public GenericResponse<JobResponse> closeJob(Long id, Long employerId) {
@@ -205,9 +205,7 @@ public class JobService implements IJobService {
     }
 
     private CompanyResponse getCompany(Long companyId){
-        return CompanyResponse.builder()
-                .id(companyId)
-                .build();
+        return companyClient.getCompanyById(companyId).getData();
     }
 
     private void assertEmployer(Job job, Long employerId) {

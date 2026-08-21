@@ -25,7 +25,8 @@ public class JwtUtil {
         return Jwts.builder()
                 .issuer("JohanWork")
                 .subject(user.getEmail())
-                .claim("role", user.getRole().name())
+                .claim("authorities", user.getRole().name())
+                .claim("userId", user.getId().toString())
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSigningKey()).compact();

@@ -4,6 +4,7 @@ import com.johanwork.job.domain.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public record SignupRequest(
 
@@ -21,6 +22,7 @@ public record SignupRequest(
         String password,
 
         @NotNull(message = "role is mandatory")
+        @Pattern(regexp = "ROLE_ADMIN|ROLE_JOB_SEEKER|ROLE_EMPLOYER", message = "role is invalid")
         UserRole role
 ) {
 }

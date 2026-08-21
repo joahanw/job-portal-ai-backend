@@ -1,5 +1,9 @@
 package com.johanwork.job.service.impl;
 
+import com.johanwork.job.client.CompanyClient;
+import com.johanwork.job.client.JobClient;
+import com.johanwork.job.client.ResumeClient;
+import com.johanwork.job.client.UserClient;
 import com.johanwork.job.constant.AppConstant;
 import com.johanwork.job.domain.ApplicationStatus;
 import com.johanwork.job.dto.ApplicationRequest;
@@ -32,6 +36,10 @@ public class ApplicationService implements IApplicationService {
     private final ApplicationRepository repository;
     private final ApplicationMapper mapper;
     private final ApplicationNoteRepository applicationNoteRepository;
+    private final JobClient jobClient;
+    private final ResumeClient resumeClient;
+    private final CompanyClient companyClient;
+    private final UserClient userClient;
 
     @Transactional
     @Override
@@ -42,12 +50,13 @@ public class ApplicationService implements IApplicationService {
                     AppConstant.Error.MESSAGE_APPLICATION_ALREADY_EXISTS);
         }
 
-        // todo: Fetch JOB
-        // todo: Fetch Resume
+        // Fetch JOB
+        JobResponse job = jobClient.getJobById(req.jobId()).getData();
+        Long companyId = job.getCompany().getId();
+        Long employerId = job.getEmployerId();
 
-        // Company ID get from JOB
-        Long companyId = 1L;
-        Long employerId = 1L;
+        // Fetch Resume
+        ResumeResponse resume = resumeClient.getResumeById(req.resumeId(), candidateId).getData();
 
         Application application = mapper.mapRequestToEntity(new Application(), candidateId,
                 companyId, employerId, req);
@@ -88,12 +97,12 @@ public class ApplicationService implements IApplicationService {
     @Override
     public GenericResponse<List<ApplicationResponse>> getApplicationForCompany(Long userId,
                                                                                CompanyApplicationFilterRequest filter) {
-        // TODO: Fetch company by ownerID
-        Long companyId = 1L;
+        // Fetch Company base on UserId
+        CompanyResponse company = companyClient.getCompanyById(userId).getData();
         Sort sort = buildSort(filter.sortBy());
         return mapper.mapToListGenericResponse(
                 repository.findAll(ApplicationSpecification.filter(
-                        companyId,
+                        company.getId(),
                         filter.jobId(),
                         filter.status(),
                         filter.isStarred(),
@@ -155,10 +164,14 @@ public class ApplicationService implements IApplicationService {
     }
 
     private ApplicationResponse buildFullResponse(Application application){
-        // TODO: Fetch the real data from respective microservices
-        JobResponse job  = JobResponse.builder().id(application.getId()).build();
-        CompanyResponse company = CompanyResponse.builder().id(application.getCompanyId()).build();
-        UserResponse candidate = UserResponse.builder().id(application.getId()).build();
+        // Fetch Job
+        JobResponse job  = jobClient.getJobById(application.getJobId()).getData();
+
+        // Fetch Company
+        CompanyResponse company = companyClient.getCompanyById(application.getCompanyId()).getData();
+
+        // Fetch Candidate
+        UserResponse candidate = userClient.getUserById(application.getCandidateId()).getData();
 
         List<ApplicationNote> notes = applicationNoteRepository.findByApplication_Id(application.getId());
         return mapper.mapEntityToResponse(application, notes, job, company, candidate);
